@@ -1,0 +1,100 @@
+openapi: 3.0.3
+info:
+  title: Supply AI API
+  description: API para el sistema inteligente de gestión de inventario y suministros
+  version: 1.0.0
+  contact:
+    name: David Timana
+    email: davidorlandotimana@gmail.com
+    url: https://github.com/davidtimana
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local Development Server
+  - url: https://api.supplyai.com
+    description: Production Server
+
+paths:
+  /api/health/ping:
+    get:
+      summary: Health check endpoint
+      description: Endpoint para verificar que la aplicación esté funcionando
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Aplicación funcionando correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "UP"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  service:
+                    type: string
+                    example: "SupplyAI Backend"
+                  version:
+                    type: string
+                    example: "1.0.0"
+  
+  /api/health/status:
+    get:
+      summary: Detailed health status
+      description: Endpoint para obtener información detallada del estado de la aplicación
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Estado detallado de la aplicación
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "UP"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  service:
+                    type: string
+                    example: "SupplyAI Backend"
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  javaVersion:
+                    type: string
+                    example: "21.0.1"
+                  springVersion:
+                    type: string
+                    example: "3.2.0"
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+
+tags:
+  - name: Health
+    description: Endpoints de verificación de salud de la aplicación

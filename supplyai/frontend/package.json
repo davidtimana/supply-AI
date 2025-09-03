@@ -1,0 +1,12 @@
+{
+  "name": "supplyai-frontend",
+  "version": "1.0.0",
+  "description": "Frontend para Supply AI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["supply", "ai", "inventory"],
+  "author": "David Timana",
+  "license": "MIT"
+}
