@@ -25,7 +25,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(exclude = {"organizacion", "sucursal", "caja", "ventaItems"})
+@ToString(exclude = {"organizacion", "sucursal", "caja", "items"})
 public class Venta {
     
     @Id
@@ -137,9 +137,8 @@ public class Venta {
     private Boolean eliminado;
     
     // Relaciones
-    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<VentaItem> ventaItems = new ArrayList<>();
+    @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<VentaItem> items = new ArrayList<>();
     
     // Métodos de negocio
     @PrePersist
@@ -163,9 +162,43 @@ public class Venta {
         fechaModificacion = LocalDateTime.now();
     }
     
+    public void addItem(VentaItem item) {
+        items.add(item);
+        item.setVenta(this);
+    }
+
+    public void removeItem(VentaItem item) {
+        items.remove(item);
+        item.setVenta(null);
+    }
+
+    public void calcularTotales() {
+        BigDecimal subtotalCalculado = BigDecimal.ZERO;
+        BigDecimal impuestoCalculado = BigDecimal.ZERO;
+        for (VentaItem item : this.items) {
+            item.calcularSubtotal();
+            subtotalCalculado = subtotalCalculado.add(item.getSubtotal());
+            impuestoCalculado = impuestoCalculado.add(item.getImpuesto());
+        }
+        this.subtotal = subtotalCalculado;
+        this.impuesto = impuestoCalculado;
+
+        if (this.descuento == null) {
+            this.descuento = BigDecimal.ZERO;
+        }
+        if (this.propina == null) {
+            this.propina = BigDecimal.ZERO;
+        }
+
+        this.total = this.subtotal.add(this.impuesto).subtract(this.descuento).add(this.propina);
+    }
+
     public void softDelete() {
         this.eliminado = true;
         this.fechaEliminacion = LocalDateTime.now();
+        for (VentaItem item : this.items) {
+            // Opcional: Marcar items como eliminados si tienen soft delete
+        }
     }
     
     public void restore() {

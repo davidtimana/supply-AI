@@ -1,7 +1,33 @@
 openapi: 3.0.3
 info:
   title: Supply AI API
-  description: API para el sistema inteligente de gestión de inventario y suministros
+  description: |
+    API REST para el sistema de gestión de inventarios y suministros Supply AI.
+    
+    ## Características
+    - **Versionado**: API v1 con soporte para futuras versiones
+    - **Multi-tenancy**: Soporte para múltiples organizaciones y sucursales
+    - **Validación**: Bean Validation en todos los endpoints
+    - **Documentación**: OpenAPI 3.0 con ejemplos y esquemas
+    
+    ## Autenticación
+    La API utiliza autenticación basada en JWT tokens (implementación futura con Keycloak).
+    
+    ## Multi-tenancy
+    Todos los endpoints requieren filtrado por organización y sucursal para garantizar el aislamiento de datos.
+    
+    ## Códigos de Estado
+    - `200` - Operación exitosa
+    - `201` - Recurso creado exitosamente
+    - `204` - Operación exitosa sin contenido
+    - `400` - Solicitud incorrecta
+    - `401` - No autenticado
+    - `403` - No autorizado
+    - `404` - Recurso no encontrado
+    - `409` - Conflicto
+    - `422` - Entidad no procesable
+    - `500` - Error interno del servidor
+    
   version: 1.0.0
   contact:
     name: David Timana
@@ -13,88 +39,1038 @@ info:
 
 servers:
   - url: http://localhost:8080
-    description: Local Development Server
+    description: Servidor de desarrollo
   - url: https://api.supplyai.com
-    description: Production Server
+    description: Servidor de producción
+
+tags:
+  - name: Salud
+    description: Endpoints para monitoreo de salud de la aplicación
+  - name: Productos
+    description: API para la gestión de productos
+  - name: Ventas
+    description: API para la gestión de ventas
+  - name: Inventario
+    description: API para la gestión de inventarios
+  - name: Caja
+    description: API para la gestión de cajas registradoras
+  - name: Suscripciones
+    description: API para la gestión de suscripciones
 
 paths:
-  /api/health/ping:
+  /api/v1/health/ping:
     get:
-      summary: Health check endpoint
-      description: Endpoint para verificar que la aplicación esté funcionando
       tags:
-        - Health
+        - Salud
+      summary: Ping de salud
+      description: Verifica que la aplicación esté funcionando correctamente
       responses:
         '200':
           description: Aplicación funcionando correctamente
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "UP"
-                  timestamp:
-                    type: string
-                    format: date-time
-                  service:
-                    type: string
-                    example: "SupplyAI Backend"
-                  version:
-                    type: string
-                    example: "1.0.0"
-  
-  /api/health/status:
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: true
+                message: "Ping exitoso"
+                data:
+                  status: "OK"
+                  timestamp: "2025-01-01T10:00:00"
+                  message: "Supply AI API funcionando correctamente"
+                timestamp: "2025-01-01T10:00:00"
+
+  /api/v1/health/status:
     get:
-      summary: Detailed health status
-      description: Endpoint para obtener información detallada del estado de la aplicación
       tags:
-        - Health
+        - Salud
+      summary: Estado de la aplicación
+      description: Proporciona información detallada sobre el estado de la aplicación
       responses:
         '200':
-          description: Estado detallado de la aplicación
+          description: Estado de la aplicación recuperado
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "UP"
-                  timestamp:
-                    type: string
-                    format: date-time
-                  service:
-                    type: string
-                    example: "SupplyAI Backend"
-                  version:
-                    type: string
-                    example: "1.0.0"
-                  javaVersion:
-                    type: string
-                    example: "21.0.1"
-                  springVersion:
-                    type: string
-                    example: "3.2.0"
+                $ref: '#/components/schemas/ApiResponse'
+
+  /api/v1/productos:
+    post:
+      tags:
+        - Productos
+      summary: Crear producto
+      description: Crea un nuevo producto en el sistema. Retorna 201 con Location header.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoDTO'
+      responses:
+        '201':
+          description: Producto creado exitosamente
+          headers:
+            Location:
+              description: URL del producto creado
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Datos del producto inválidos
+        '409':
+          description: Conflicto: producto ya existe
+
+  /api/v1/productos/{id}:
+    get:
+      tags:
+        - Productos
+      summary: Obtener producto por ID
+      description: Recupera un producto específico por su identificador
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del producto
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Producto no encontrado
+
+    put:
+      tags:
+        - Productos
+      summary: Actualizar producto
+      description: Actualiza un producto existente por su ID. Operación idempotente.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del producto
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoDTO'
+      responses:
+        '200':
+          description: Producto actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Producto no encontrado
+        '400':
+          description: Datos del producto inválidos
+
+    delete:
+      tags:
+        - Productos
+      summary: Eliminar producto
+      description: Elimina un producto del sistema por su ID. Operación idempotente.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del producto
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '204':
+          description: Producto eliminado exitosamente
+        '404':
+          description: Producto no encontrado
+
+  /api/v1/productos/sucursal/{sucursalId}:
+    get:
+      tags:
+        - Productos
+      summary: Listar productos por sucursal
+      description: Recupera todos los productos de una sucursal específica con paginación. Paginación obligatoria.
+      parameters:
+        - name: sucursalId
+          in: path
+          required: true
+          description: ID de la sucursal
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page
+          in: query
+          description: Número de página (0-based)
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          description: Tamaño de la página
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: sort
+          in: query
+          description: Campo de ordenamiento (ej: nombre,asc)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Productos recuperados exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Parámetros de paginación inválidos
+
+  /api/v1/ventas:
+    post:
+      tags:
+        - Ventas
+      summary: Crear venta
+      description: Crea una nueva venta con validación de stock y actualización de inventario. Retorna 201 con Location header.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CrearVentaRequest'
+      responses:
+        '201':
+          description: Venta creada exitosamente
+          headers:
+            Location:
+              description: URL de la venta creada
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Datos de la venta inválidos
+        '409':
+          description: Stock insuficiente para algún producto
+        '422':
+          description: Estado de la venta inválido
+
+  /api/v1/ventas/{id}:
+    get:
+      tags:
+        - Ventas
+      summary: Obtener venta por ID
+      description: Recupera una venta específica por su identificador
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la venta
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Venta encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Venta no encontrada
+
+  /api/v1/ventas/{ventaId}/dividir:
+    post:
+      tags:
+        - Ventas
+      summary: Dividir cuenta de venta
+      description: Divide el pago de una venta en múltiples métodos de pago
+      parameters:
+        - name: ventaId
+          in: path
+          required: true
+          description: ID de la venta
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pagos:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PagoDividido'
+      responses:
+        '200':
+          description: Venta dividida exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Venta no encontrada
+        '400':
+          description: Datos de división inválidos
+        '422':
+          description: Estado de la venta no permite división
+
+  /api/v1/ventas/sucursal/{sucursalId}:
+    get:
+      tags:
+        - Ventas
+      summary: Listar ventas por sucursal
+      description: Recupera todas las ventas de una sucursal específica con paginación. Paginación obligatoria.
+      parameters:
+        - name: sucursalId
+          in: path
+          required: true
+          description: ID de la sucursal
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: page
+          in: query
+          description: Número de página (0-based)
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          description: Tamaño de la página
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Ventas recuperadas exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Parámetros de paginación inválidos
+
+  /api/v1/inventario/entrada:
+    post:
+      tags:
+        - Inventario
+      summary: Registrar entrada de inventario
+      description: Registra una entrada de productos al inventario, aumentando el stock disponible
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AjusteInventarioRequest'
+      responses:
+        '200':
+          description: Entrada registrada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Datos de entrada inválidos
+        '404':
+          description: Inventario no encontrado
+
+  /api/v1/inventario/salida:
+    post:
+      tags:
+        - Inventario
+      summary: Registrar salida de inventario
+      description: Registra una salida de productos del inventario, disminuyendo el stock disponible
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AjusteInventarioRequest'
+      responses:
+        '200':
+          description: Salida registrada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Datos de salida inválidos
+        '404':
+          description: Inventario no encontrado
+        '409':
+          description: Stock insuficiente para la salida
+
+  /api/v1/inventario/ajuste:
+    post:
+      tags:
+        - Inventario
+      summary: Realizar ajuste de inventario
+      description: Realiza un ajuste general del stock de inventario (establece un nuevo valor)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AjusteInventarioRequest'
+      responses:
+        '200':
+          description: Ajuste realizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Datos de ajuste inválidos
+        '404':
+          description: Inventario no encontrado
+
+  /api/v1/inventario/producto/{productoId}/sucursal/{sucursalId}:
+    get:
+      tags:
+        - Inventario
+      summary: Obtener inventario por producto y sucursal
+      description: Recupera la información de inventario de un producto específico en una sucursal
+      parameters:
+        - name: productoId
+          in: path
+          required: true
+          description: ID del producto
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: sucursalId
+          in: path
+          required: true
+          description: ID de la sucursal
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Inventario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Inventario no encontrado
+
+  /api/v1/caja/{cajaId}/apertura:
+    post:
+      tags:
+        - Caja
+      summary: Abrir caja
+      description: Abre una caja registradora con un monto inicial y cambia su estado a ABIERTA
+      parameters:
+        - name: cajaId
+          in: path
+          required: true
+          description: ID de la caja
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                montoInicial:
+                  type: number
+                  format: decimal
+                  minimum: 0.01
+                  description: Monto inicial con el que se abre la caja
+              required:
+                - montoInicial
+      responses:
+        '200':
+          description: Caja abierta exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: La caja ya está abierta o datos inválidos
+        '404':
+          description: Caja no encontrada
+
+  /api/v1/caja/{cajaId}/cierre:
+    post:
+      tags:
+        - Caja
+      summary: Cerrar caja
+      description: Cierra una caja registradora, cambia su estado a CERRADA y registra el movimiento
+      parameters:
+        - name: cajaId
+          in: path
+          required: true
+          description: ID de la caja
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Caja cerrada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: La caja ya está cerrada
+        '404':
+          description: Caja no encontrada
+
+  /api/v1/caja/{id}:
+    get:
+      tags:
+        - Caja
+      summary: Obtener caja por ID
+      description: Recupera una caja específica por su identificador
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la caja
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Caja encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Caja no encontrada
+
+  /api/v1/suscripciones:
+    post:
+      tags:
+        - Suscripciones
+      summary: Crear suscripción
+      description: Crea una nueva suscripción para una organización
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuscripcionDTO'
+      responses:
+        '201':
+          description: Suscripción creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Datos de la suscripción inválidos
+
+  /api/v1/suscripciones/{organizacionId}/plan:
+    patch:
+      tags:
+        - Suscripciones
+      summary: Cambiar plan de suscripción
+      description: Cambia el plan de suscripción de una organización
+      parameters:
+        - name: organizacionId
+          in: path
+          required: true
+          description: ID de la organización
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nuevoPlan:
+                  type: string
+                  enum: [GRATUITO, BASICO, PRO, ENTERPRISE, CUSTOM]
+                  description: Nuevo plan de suscripción
+              required:
+                - nuevoPlan
+      responses:
+        '200':
+          description: Plan cambiado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Nuevo plan inválido
+        '404':
+          description: Suscripción no encontrada
+
+  /api/v1/suscripciones/{organizacionId}:
+    get:
+      tags:
+        - Suscripciones
+      summary: Obtener suscripción por organización
+      description: Recupera la suscripción activa de una organización específica
+      parameters:
+        - name: organizacionId
+          in: path
+          required: true
+          description: ID de la organización
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Suscripción encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Suscripción no encontrada
 
 components:
   schemas:
-    Error:
+    ApiResponse:
       type: object
       properties:
+        success:
+          type: boolean
+          description: Indica si la operación fue exitosa
+        message:
+          type: string
+          description: Mensaje descriptivo de la operación
+        data:
+          description: Datos de la respuesta (solo en caso de éxito)
+        errorCode:
+          type: string
+          description: Código de error (solo en caso de error)
         timestamp:
           type: string
           format: date-time
-        status:
-          type: integer
-        error:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
+          description: Timestamp de la respuesta
+      required:
+        - success
+        - message
+        - timestamp
 
-tags:
-  - name: Health
-    description: Endpoints de verificación de salud de la aplicación
+    ProductoDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID único del producto
+        nombre:
+          type: string
+          maxLength: 200
+          description: Nombre del producto
+        descripcion:
+          type: string
+          description: Descripción detallada del producto
+        precioVenta:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Precio de venta del producto
+        precioCosto:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Precio de costo del producto
+        tipoProducto:
+          type: string
+          enum: [SIMPLE, COMPUESTO, COMBO]
+          description: Tipo de producto
+        activo:
+          type: boolean
+          description: Indica si el producto está activo
+      required:
+        - nombre
+        - precioVenta
+        - tipoProducto
+
+    VentaDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID único de la venta
+        sucursalId:
+          type: integer
+          format: int64
+          description: ID de la sucursal donde se realizó la venta
+        cajaId:
+          type: integer
+          format: int64
+          description: ID de la caja donde se procesó la venta
+        numeroTicket:
+          type: string
+          maxLength: 100
+          description: Número de ticket de la venta
+        subtotal:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Subtotal de la venta
+        impuesto:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Impuesto aplicado
+        descuento:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Descuento aplicado
+        total:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Total de la venta
+        estado:
+          type: string
+          enum: [PENDIENTE, COMPLETADA, CANCELADA]
+          description: Estado de la venta
+        metodoPago:
+          type: string
+          enum: [EFECTIVO, TARJETA, TRANSFERENCIA, CRYPTO]
+          description: Método de pago utilizado
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/VentaItemDTO'
+          description: Items de la venta
+      required:
+        - sucursalId
+        - cajaId
+        - subtotal
+        - impuesto
+        - descuento
+        - total
+        - estado
+        - metodoPago
+
+    VentaItemDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID único del item
+        productoId:
+          type: integer
+          format: int64
+          description: ID del producto
+        cantidad:
+          type: number
+          format: decimal
+          minimum: 0.001
+          description: Cantidad vendida
+        precioUnitario:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Precio unitario del producto
+        subtotal:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Subtotal del item
+      required:
+        - productoId
+        - cantidad
+        - precioUnitario
+
+    CrearVentaRequest:
+      type: object
+      properties:
+        sucursalId:
+          type: integer
+          format: int64
+          minimum: 1
+          description: ID de la sucursal donde se realiza la venta
+        cajaId:
+          type: integer
+          format: int64
+          minimum: 1
+          description: ID de la caja donde se procesa la venta
+        metodoPago:
+          type: string
+          enum: [EFECTIVO, TARJETA, TRANSFERENCIA, CRYPTO]
+          description: Método de pago utilizado
+        clienteNombre:
+          type: string
+          maxLength: 200
+          description: Nombre del cliente (opcional)
+        clienteDocumento:
+          type: string
+          maxLength: 50
+          description: Documento de identidad del cliente (opcional)
+        clienteEmail:
+          type: string
+          format: email
+          maxLength: 100
+          description: Email del cliente (opcional)
+        clienteTelefono:
+          type: string
+          maxLength: 20
+          description: Teléfono del cliente (opcional)
+        observaciones:
+          type: string
+          description: Observaciones adicionales de la venta (opcional)
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/VentaItemDTO'
+          minItems: 1
+          description: Lista de items de la venta
+      required:
+        - sucursalId
+        - cajaId
+        - metodoPago
+        - items
+
+    AjusteInventarioRequest:
+      type: object
+      properties:
+        productoId:
+          type: integer
+          format: int64
+          minimum: 1
+          description: ID del producto a ajustar
+        sucursalId:
+          type: integer
+          format: int64
+          minimum: 1
+          description: ID de la sucursal donde se realiza el ajuste
+        cantidad:
+          type: number
+          format: decimal
+          minimum: 0.001
+          description: Cantidad a ajustar
+        tipoMovimiento:
+          type: string
+          enum: [ENTRADA, SALIDA, AJUSTE]
+          description: Tipo de movimiento de inventario
+        precioUnitario:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Precio unitario del producto (opcional)
+        referencia:
+          type: string
+          maxLength: 200
+          description: Referencia del movimiento (opcional)
+        documento:
+          type: string
+          maxLength: 100
+          description: Documento asociado al movimiento (opcional)
+        observaciones:
+          type: string
+          description: Observaciones adicionales del movimiento (opcional)
+      required:
+        - productoId
+        - sucursalId
+        - cantidad
+        - tipoMovimiento
+
+    InventarioDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID único del inventario
+        productoId:
+          type: integer
+          format: int64
+          description: ID del producto
+        sucursalId:
+          type: integer
+          format: int64
+          description: ID de la sucursal
+        stockActual:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Stock actual disponible
+        stockMinimo:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Stock mínimo requerido
+        stockMaximo:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Stock máximo permitido
+        activo:
+          type: boolean
+          description: Indica si el inventario está activo
+      required:
+        - productoId
+        - sucursalId
+        - stockActual
+
+    CajaDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID único de la caja
+        sucursalId:
+          type: integer
+          format: int64
+          description: ID de la sucursal
+        nombre:
+          type: string
+          maxLength: 100
+          description: Nombre de la caja
+        estado:
+          type: string
+          enum: [ABIERTA, CERRADA]
+          description: Estado actual de la caja
+        saldoInicial:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Saldo inicial de la caja
+        saldoActual:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Saldo actual de la caja
+        activa:
+          type: boolean
+          description: Indica si la caja está activa
+      required:
+        - sucursalId
+        - nombre
+        - estado
+
+    SuscripcionDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID único de la suscripción
+        organizacionId:
+          type: integer
+          format: int64
+          description: ID de la organización
+        plan:
+          type: string
+          enum: [GRATUITO, BASICO, PRO, ENTERPRISE, CUSTOM]
+          description: Plan de suscripción
+        estado:
+          type: string
+          enum: [ACTIVA, SUSPENDIDA, CANCELADA]
+          description: Estado de la suscripción
+        fechaInicio:
+          type: string
+          format: date-time
+          description: Fecha de inicio de la suscripción
+        fechaFin:
+          type: string
+          format: date-time
+          description: Fecha de fin de la suscripción
+        precio:
+          type: number
+          format: decimal
+          minimum: 0
+          description: Precio del plan
+        activa:
+          type: boolean
+          description: Indica si la suscripción está activa
+      required:
+        - organizacionId
+        - plan
+        - estado
+
+    PagoDividido:
+      type: object
+      properties:
+        metodoPago:
+          type: string
+          enum: [EFECTIVO, TARJETA, TRANSFERENCIA, CRYPTO]
+          description: Método de pago para esta parte
+        monto:
+          type: number
+          format: decimal
+          minimum: 0.01
+          description: Monto a pagar con este método
+        referencia:
+          type: string
+          maxLength: 200
+          description: Referencia del pago (opcional)
+      required:
+        - metodoPago
+        - monto
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT para autenticación
+
+security:
+  - BearerAuth: []
+
+# Configuración adicional
+x-tagGroups:
+  - name: Operaciones Core
+    tags:
+      - Productos
+      - Inventario
+      - Ventas
+  - name: Gestión Operativa
+    tags:
+      - Caja
+      - Suscripciones
+  - name: Monitoreo
+    tags:
+      - Salud
