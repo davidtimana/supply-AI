@@ -1,0 +1,79 @@
+name: 🐛 Bug Report
+description: Reportar un bug en Supply AI
+title: "[BUG] "
+labels: ["bug", "triage"]
+assignees: ["davidtimana"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por reportar un bug. Por favor, completa la siguiente información para ayudarnos a resolver el problema.
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Descripción del bug
+      description: Una descripción clara y concisa del problema
+      placeholder: Describe qué está pasando...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Pasos para reproducir
+      description: Pasos para reproducir el comportamiento
+      placeholder: |
+        1. Ve a '...'
+        2. Haz clic en '...'
+        3. Desplázate hacia abajo hasta '...'
+        4. Ve el error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Comportamiento esperado
+      description: Una descripción clara y concisa de lo que esperabas que pasara
+      placeholder: Describe qué debería pasar...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Comportamiento actual
+      description: Una descripción clara y concisa de lo que está pasando actualmente
+      placeholder: Describe qué está pasando realmente...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Entorno
+      description: Selecciona el entorno donde ocurre el problema
+      options:
+        - Desarrollo local
+        - Docker
+        - Producción
+        - Otro
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Si aplica, añade logs relevantes
+      placeholder: Pega aquí los logs relevantes...
+      render: shell
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Contexto adicional
+      description: Cualquier otro contexto sobre el problema
+      placeholder: Añade cualquier otro contexto sobre el problema aquí...

@@ -176,6 +176,43 @@ curl http://localhost:8082/api/v1/health/ping
 docker exec supplyai-mysql mysql -u supplyai -psupplyai123 -e "SELECT 1;"
 ```
 
+## CI/CD
+
+El proyecto incluye pipelines automatizados de CI/CD:
+
+### 🔄 Workflows Automáticos
+
+- **CI Pipeline**: Se ejecuta en cada push y PR
+  - Tests unitarios e integración
+  - Build de la aplicación
+  - Análisis de seguridad con CodeQL
+  - Escaneo de vulnerabilidades con Trivy
+
+- **CD Pipeline**: Se ejecuta en merge a `main`
+  - Build y push de imagen Docker
+  - Deploy automático a producción
+  - Health checks post-deploy
+
+### 📊 Estados de Build
+
+[![CI](https://github.com/davidtimana/supply-AI/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/davidtimana/supply-AI/actions)
+[![Security](https://github.com/davidtimana/supply-AI/workflows/CodeQL%20Security%20Analysis/badge.svg)](https://github.com/davidtimana/supply-AI/security)
+
+### 🛠️ Configuración Local
+
+Para ejecutar los mismos checks localmente:
+
+```bash
+# Ejecutar tests
+cd backend && ./gradlew test
+
+# Ejecutar análisis de seguridad
+docker run --rm -v $(pwd):/app aquasec/trivy fs /app
+
+# Build de la aplicación
+cd backend && ./gradlew build
+```
+
 ## Contribución
 
 1. Fork el proyecto
@@ -183,6 +220,13 @@ docker exec supplyai-mysql mysql -u supplyai -psupplyai123 -e "SELECT 1;"
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abrir un Pull Request
+
+### 📋 Checklist para PRs
+
+- [ ] Tests pasan localmente
+- [ ] Código sigue las guías de estilo
+- [ ] Documentación actualizada
+- [ ] No hay conflictos de merge
 
 ## Licencia
 

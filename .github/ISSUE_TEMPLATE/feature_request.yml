@@ -1,0 +1,65 @@
+name: ✨ Feature Request
+description: Sugerir una nueva funcionalidad para Supply AI
+title: "[FEATURE] "
+labels: ["enhancement", "triage"]
+assignees: ["davidtimana"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por sugerir una nueva funcionalidad. Por favor, completa la siguiente información para ayudarnos a entender tu propuesta.
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Descripción de la funcionalidad
+      description: Una descripción clara y concisa de la funcionalidad que te gustaría ver
+      placeholder: Describe la funcionalidad que te gustaría...
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-solution
+    attributes:
+      label: Problema que resuelve
+      description: ¿Qué problema resuelve esta funcionalidad?
+      placeholder: Describe el problema que esta funcionalidad resolvería...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Solución propuesta
+      description: Describe cómo te gustaría que funcionara esta característica
+      placeholder: Describe tu solución propuesta...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas
+      description: Describe cualquier solución o funcionalidad alternativa que hayas considerado
+      placeholder: Describe las alternativas que has considerado...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioridad
+      description: ¿Qué tan importante es esta funcionalidad?
+      options:
+        - Baja
+        - Media
+        - Alta
+        - Crítica
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Contexto adicional
+      description: Cualquier otro contexto, screenshots o información sobre la funcionalidad
+      placeholder: Añade cualquier otro contexto sobre la funcionalidad aquí...
