@@ -14,10 +14,36 @@ Supply AI es una plataforma que utiliza inteligencia artificial para optimizar l
 - 📱 **Multiplataforma**: Web y aplicaciones móviles
 - 🔒 **Seguridad**: Autenticación robusta y encriptación de datos
 
+## Estructura del Proyecto
+
+```
+supply-ai/
+├── backend/                    # 🎯 Código Java del backend
+│   ├── src/                    # Código fuente Java
+│   ├── build/                  # Archivos compilados
+│   ├── build.gradle            # Configuración de Gradle
+│   ├── settings.gradle         # Configuración de Gradle
+│   ├── gradlew                 # Wrapper de Gradle
+│   └── gradle/                 # Configuración de Gradle
+├── frontend/                   # 🎯 Código React/JavaScript
+│   ├── src/                    # Código fuente del frontend
+│   ├── App.js                  # Componente principal
+│   └── package.json            # Dependencias del frontend
+├── database/                   # 🎯 Scripts de base de datos
+│   ├── config.sql
+│   ├── schema.sql
+│   └── README.md
+├── documentation/              # 🎯 Documentación del proyecto
+│   └── api-spec.yaml
+├── docker-compose.yml          # 🐳 Configuración de Docker
+├── README.md                   # 📖 Documentación principal
+└── LICENSE                     # 🎯 Licencia del proyecto
+```
+
 ## Tecnologías
 
-- **Backend**: Spring Boot, Java
-- **Frontend**: React/Next.js
+- **Backend**: Spring Boot, Java 17+
+- **Frontend**: React/JavaScript
 - **Base de Datos**: PostgreSQL
 - **Autenticación**: Keycloak
 - **IA/ML**: Python, TensorFlow/PyTorch
@@ -49,6 +75,21 @@ cp .env.example .env
 3. Ejecutar con Docker:
 ```bash
 docker-compose up -d
+```
+
+### Desarrollo Local
+
+#### Backend (Spring Boot)
+```bash
+cd backend
+./gradlew bootRun
+```
+
+#### Frontend (React)
+```bash
+cd frontend
+npm install
+npm start
 ```
 
 ## Uso
