@@ -40,25 +40,29 @@ supply-ai/
 └── LICENSE                     # 🎯 Licencia del proyecto
 ```
 
+### Servicios Docker
+
+- **Backend**: Spring Boot en puerto 8082
+- **MySQL**: Base de datos en puerto 3306
+- **Red**: Red interna `supplyai-network`
+- **Volúmenes**: Persistencia de datos MySQL
+
 ## Tecnologías
 
-- **Backend**: Spring Boot, Java 17+
-- **Frontend**: React/JavaScript
-- **Base de Datos**: PostgreSQL
-- **Autenticación**: Keycloak
-- **IA/ML**: Python, TensorFlow/PyTorch
-- **DevOps**: Docker, Kubernetes
+- **Backend**: Spring Boot, Java 21
+- **Base de Datos**: MySQL 8.0
+- **DevOps**: Docker, Docker Compose
+- **Documentación**: Swagger/OpenAPI 3
+- **Testing**: JUnit 5, Mockito
 
 ## Instalación
 
 ### Prerrequisitos
 
-- Java 17+
-- Node.js 18+
 - Docker
-- PostgreSQL
+- Docker Compose
 
-### Pasos de instalación
+### Instalación con Docker (Recomendado)
 
 1. Clonar el repositorio:
 ```bash
@@ -66,15 +70,14 @@ git clone https://github.com/davidtimana/supply-AI.git
 cd supply-AI
 ```
 
-2. Configurar variables de entorno:
-```bash
-cp .env.example .env
-# Editar .env con tus configuraciones
-```
-
-3. Ejecutar con Docker:
+2. Ejecutar con Docker Compose:
 ```bash
 docker-compose up -d
+```
+
+3. Verificar que los servicios estén funcionando:
+```bash
+docker-compose ps
 ```
 
 ### Desarrollo Local
@@ -94,10 +97,84 @@ npm start
 
 ## Uso
 
-1. Acceder a la aplicación web: `http://localhost:3000`
-2. Configurar tu organización y productos
-3. Importar datos históricos
-4. Configurar modelos de IA para predicciones
+### Endpoints Disponibles
+
+Una vez que la aplicación esté ejecutándose, puedes acceder a:
+
+- **API Backend**: `http://localhost:8082`
+- **Health Check**: `http://localhost:8082/api/v1/health/ping`
+- **Status**: `http://localhost:8082/api/v1/health/status`
+- **Swagger UI**: `http://localhost:8082/swagger-ui.html`
+
+### Base de Datos
+
+La base de datos MySQL está disponible externamente en:
+- **Host**: `localhost`
+- **Puerto**: `3306`
+- **Base de datos**: `supplyai`
+- **Usuario**: `supplyai`
+- **Contraseña**: `supplyai123`
+
+### Comandos Útiles
+
+```bash
+# Ver logs de la aplicación
+docker-compose logs backend
+
+# Ver logs de la base de datos
+docker-compose logs mysql
+
+# Reiniciar servicios
+docker-compose restart
+
+# Detener servicios
+docker-compose down
+
+# Detener y eliminar volúmenes
+docker-compose down --volumes
+```
+
+## Troubleshooting
+
+### Problemas Comunes
+
+**Puerto 8080 ocupado:**
+```bash
+# Cambiar puerto en docker-compose.yml
+ports:
+  - "8082:8080"  # Usar puerto 8082 en lugar de 8080
+```
+
+**Error de conexión a MySQL:**
+```bash
+# Verificar que MySQL esté ejecutándose
+docker-compose logs mysql
+
+# Reiniciar MySQL
+docker-compose restart mysql
+```
+
+**Backend no inicia:**
+```bash
+# Ver logs del backend
+docker-compose logs backend
+
+# Reconstruir imagen
+docker-compose up --build backend
+```
+
+### Verificación de Salud
+
+```bash
+# Verificar estado de contenedores
+docker-compose ps
+
+# Probar endpoint de health
+curl http://localhost:8082/api/v1/health/ping
+
+# Probar conexión a MySQL
+docker exec supplyai-mysql mysql -u supplyai -psupplyai123 -e "SELECT 1;"
+```
 
 ## Contribución
 
