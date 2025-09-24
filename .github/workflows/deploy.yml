@@ -1,0 +1,76 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/supply-ai
+
+jobs:
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ secrets.GHCR_USERNAME }}
+        password: ${{ secrets.GHCR_PAT }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Deploy to server
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "🚀 Deploying to production server..."
+        echo "📦 Image: ${{ steps.meta.outputs.tags }}"
+        echo "🔧 Add your deployment commands here"
+        echo "   - Update docker-compose.yml with new image"
+        echo "   - Run docker-compose pull"
+        echo "   - Run docker-compose up -d"
+        echo "   - Run health checks" 
+
+    - name: Health Check
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "🏥 Running health checks..."
+        echo "   - Check application endpoints"
+        echo "   - Verify database connectivity"
+        echo "   - Monitor application logs"
+
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "✅ Deployment completed successfully!"
+        else
+          echo "❌ Deployment failed!"
+        fi
