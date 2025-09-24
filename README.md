@@ -185,8 +185,9 @@ El proyecto incluye pipelines automatizados de CI/CD:
 - **CI Pipeline**: Se ejecuta en cada push y PR
   - Tests unitarios e integración
   - Build de la aplicación
-  - Análisis de seguridad con CodeQL
   - Escaneo de vulnerabilidades con Trivy
+  - ~~Análisis de seguridad con CodeQL~~ (deshabilitado temporalmente)
+  - ~~Dependabot auto-merge~~ (deshabilitado temporalmente)
 
 - **CD Pipeline**: Se ejecuta en merge a `main`
   - Build y push de imagen Docker
@@ -196,7 +197,7 @@ El proyecto incluye pipelines automatizados de CI/CD:
 ### 📊 Estados de Build
 
 [![CI](https://github.com/davidtimana/supply-AI/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/davidtimana/supply-AI/actions)
-[![Security](https://github.com/davidtimana/supply-AI/workflows/CodeQL%20Security%20Analysis/badge.svg)](https://github.com/davidtimana/supply-AI/security)
+<!-- [![Security](https://github.com/davidtimana/supply-AI/workflows/CodeQL%20Security%20Analysis/badge.svg)](https://github.com/davidtimana/supply-AI/security) -->
 
 ### 🛠️ Configuración Local
 

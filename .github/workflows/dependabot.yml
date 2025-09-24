@@ -1,8 +1,11 @@
 name: Dependabot Auto-merge
 
+# Dependabot workflow disabled temporarily
+# on:
+#   pull_request:
+#     types: [opened, synchronize]
 on:
-  pull_request:
-    types: [opened, synchronize]
+  workflow_dispatch:  # Only manual execution
 
 jobs:
   auto-merge:
