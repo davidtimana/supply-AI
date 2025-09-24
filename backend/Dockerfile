@@ -4,7 +4,7 @@ FROM openjdk:21-jdk-slim
 # Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos de configuración de Gradle
+# Copiar todos los archivos de Gradle de una vez
 COPY gradle/ gradle/
 COPY gradlew .
 COPY build.gradle .
@@ -12,6 +12,13 @@ COPY settings.gradle .
 
 # Hacer gradlew ejecutable
 RUN chmod +x gradlew
+
+# Verificar que el wrapper esté completo
+RUN ls -la gradle/wrapper/
+RUN ls -la gradle/wrapper/gradle-wrapper.jar
+
+# Verificar que gradlew funcione
+RUN ./gradlew --version
 
 # Descargar dependencias (esto se cachea si no cambian los archivos de configuración)
 RUN ./gradlew dependencies --no-daemon
