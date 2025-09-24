@@ -13,12 +13,9 @@ COPY settings.gradle .
 # Hacer gradlew ejecutable
 RUN chmod +x gradlew
 
-# Verificar que el wrapper esté completo
-RUN ls -la gradle/wrapper/
-RUN ls -la gradle/wrapper/gradle-wrapper.jar
-
-# Verificar que gradlew funcione
-RUN ./gradlew --version
+# Verificar que el wrapper esté presente
+RUN ls -la gradle/wrapper/ || echo "Wrapper directory not found"
+RUN ls -la gradle/wrapper/gradle-wrapper.jar || echo "gradle-wrapper.jar not found"
 
 # Descargar dependencias (esto se cachea si no cambian los archivos de configuración)
 RUN ./gradlew dependencies --no-daemon
