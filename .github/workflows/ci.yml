@@ -15,7 +15,7 @@ env:
   JAVA_VERSION: '21'
   GRADLE_VERSION: '8.5'
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository_owner }}/supply-ai
 
 jobs:
   test:
@@ -146,7 +146,7 @@ jobs:
         echo "✅ CI/CD Pipeline completed successfully!"
         echo "🚀 Application built and tested successfully"
         echo "🐳 Docker image pushed to GitHub Container Registry"
-        echo "📦 Image: ghcr.io/${{ github.repository }}/backend"
+        echo "📦 Image: ghcr.io/${{ github.repository_owner }}/supply-ai/backend"
 
     - name: Notify Failure
       if: ${{ needs.test.result == 'failure' || needs.build-docker.result == 'failure' }}
