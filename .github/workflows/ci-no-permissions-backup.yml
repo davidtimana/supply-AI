@@ -6,11 +6,6 @@ on:
   pull_request:
     branches: [ main, develop ]
 
-# Permisos necesarios para GitHub Container Registry
-permissions:
-  contents: read
-  packages: write
-
 env:
   JAVA_VERSION: '21'
   GRADLE_VERSION: '8.5'
@@ -84,7 +79,6 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
 
-    # Permisos específicos para este job
     permissions:
       contents: read
       packages: write
