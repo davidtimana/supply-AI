@@ -100,7 +100,7 @@ jobs:
         echo "✅ Found GHCR_PAT. Proceeding with registry login."
 
     - name: Log in to GHCR (explicit username)
-      if: ${{ secrets.GHCR_USERNAME != '' }}
+      if: ${{ secrets.GHCR_USERNAME }}
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
@@ -108,7 +108,7 @@ jobs:
         password: ${{ secrets.GHCR_PAT }}
 
     - name: Log in to GHCR (fallback to actor)
-      if: ${{ secrets.GHCR_USERNAME == '' }}
+      if: ${{ !secrets.GHCR_USERNAME }}
       uses: docker/login-action@v3
       with:
         registry: ${{ env.REGISTRY }}
